@@ -4,279 +4,265 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FAST Golden Circle</title>
+
   <style>
     :root{
-      --bg: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e6e8ef;
-      --ring: rgba(15, 23, 42, .12);
-      --shadow: 0 10px 30px rgba(2, 6, 23, .06);
-      --radius: 16px;
+      --bg:#fff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e6e8ef;
+      --ring: rgba(15,23,42,.12);
+      --shadow: 0 10px 30px rgba(2,6,23,.06);
+      --radius:16px;
 
-      --why:  #e30a17;
-      --how:  #ff751f;
-      --what: #003cbb;
+      /* accordion tag/border colors */
+      --why:#e30a17;   /* kırmızı */
+      --how:#003cbb;   /* mavi */
+      --what:#63a800;  /* yeşil */
 
       --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    *{ box-sizing: border-box; }
+    *{box-sizing:border-box}
     body{
-      margin: 0;
-      font-family: var(--font);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
     .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 28px 16px 56px;
+      max-width:980px;
+      margin:0 auto;
+      padding:18px 16px 56px;
     }
 
-    header{
-      display: grid;
-      gap: 8px;
-      margin-bottom: 14px;
-      text-align: center;
+    .top{
+      display:grid;
+      gap:10px;
+      justify-items:center;
+      margin-bottom:12px;
     }
 
-    h1{
-      font-size: clamp(22px, 2.2vw, 30px);
-      margin: 0;
-      letter-spacing: -0.2px;
+    .gcStage{
+      width:min(560px, 94vw);
+      aspect-ratio:1/1;
+      position:relative;
+      display:grid;
+      place-items:center;
     }
 
-    .sub{
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
+    .layer{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      pointer-events:none; /* SVG won't steal clicks */
+    }
+    .layer svg{ width:100%; height:100%; display:block; }
+
+    /* Click targets */
+    .hotspot{
+      position:absolute;
+      inset:0;
+      margin:auto;
+      border-radius:999px;
+      background:transparent;
+      border:none;
+      padding:0;
+      cursor:pointer;
+      outline:none;
+      opacity:0; /* invisible */
+    }
+    .hotspot:focus-visible{
+      box-shadow: 0 0 0 4px var(--ring);
+      opacity:0;
     }
 
-    .toolbar{
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
+    /* Ring hit areas (tuned for your artwork) */
+    .hotspot.what{ width:92%; height:92%; } /* yeşil dış halka */
+    .hotspot.how { width:70%; height:70%; } /* mavi orta halka */
+    .hotspot.why { width:44%; height:44%; } /* kırmızı iç halka */
 
+    /* Hover tint: apply to correct layer only */
+    .state--why  .layer-why  { filter: brightness(1.10) saturate(1.12); }
+    .state--how  .layer-how  { filter: brightness(1.12) saturate(1.15); }
+    .state--what .layer-what { filter: brightness(1.08) saturate(1.12); }
+
+    .layer-why, .layer-how, .layer-what { transition: filter .16s ease; }
+
+    .toolbar{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
     .btn{
-      appearance: none;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 1px 0 rgba(2,6,23,.03);
+      appearance:none;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:14px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow:0 1px 0 rgba(2,6,23,.03);
       transition: transform .08s ease, box-shadow .18s ease, border-color .18s ease;
     }
-    .btn:hover{ border-color: #d8dbe6; box-shadow: var(--shadow); }
+    .btn:hover{ border-color:#d8dbe6; box-shadow:var(--shadow); }
     .btn:active{ transform: translateY(1px); }
-    .btn:focus-visible{ outline: none; box-shadow: 0 0 0 4px var(--ring), var(--shadow); }
-
-    /* Circle area centered, no background */
-    .circleArea{
-      display: grid;
-      place-items: center;
-      margin: 10px 0 16px;
-    }
-
-    .gc{
-      width: min(520px, 92vw);
-      aspect-ratio: 1 / 1;
-      display: grid;
-      place-items: center;
-    }
-
-    .gc svg{
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .gcCircle{
-      fill: none;
-      stroke-linecap: round;
-      cursor: pointer;
-      transition: filter .18s ease, opacity .18s ease;
-      opacity: .98;
-    }
-    .gcCircle:hover{ filter: drop-shadow(0 10px 16px rgba(2,6,23,.18)); opacity: 1; }
-    .gcCircle:focus-visible{
-      outline: none;
-      filter: drop-shadow(0 0 0 rgba(0,0,0,0));
-    }
+    .btn:focus-visible{ outline:none; box-shadow:0 0 0 4px var(--ring), var(--shadow); }
 
     .hint{
-      margin: 0 0 10px;
-      text-align: center;
-      font-size: 14px;
-      color: var(--muted);
+      margin:0;
+      text-align:center;
+      font-size:14px;
+      color:var(--muted);
     }
 
     /* Accordion */
     .card{
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-top:14px;
+      width:100%;
     }
-
-    details{ border-top: 1px solid var(--border); }
-    details:first-child{ border-top: none; }
+    details{ border-top:1px solid var(--border); }
+    details:first-child{ border-top:none; }
 
     summary{
-      list-style: none;
-      cursor: pointer;
-      padding: 18px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      user-select: none;
-      font-weight: 700;
-      font-size: 15px;
-      background: rgba(255,255,255,.98);
+      list-style:none;
+      cursor:pointer;
+      padding:18px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      user-select:none;
+      font-weight:700;
+      font-size:15px;
+      background:rgba(255,255,255,.98);
     }
-    summary::-webkit-details-marker{ display:none; }
+    summary::-webkit-details-marker{display:none}
 
-    .summaryLeft{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
+    .summaryLeft{ display:flex; align-items:center; gap:12px; min-width:0; }
     .tag{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      color: #fff;
-      flex: 0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.6px;
+      padding:6px 10px;
+      border-radius:999px;
+      color:#fff;
+      flex:0 0 auto;
     }
-
-    .titleText{
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .titleText{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
     .chev{
-      width: 18px;
-      height: 18px;
-      flex: 0 0 auto;
+      width:18px; height:18px;
+      flex:0 0 auto;
       transition: transform .18s ease;
-      opacity: .75;
-      color: #0f172a;
+      opacity:.75;
+      color:#0f172a;
     }
     details[open] .chev{ transform: rotate(180deg); }
 
-    .content{
-      padding: 0 16px 16px;
-      color: rgba(15,23,42,.92);
-      font-size: 15px;
-    }
-    .content p{ margin: 10px 0 0; }
-    .content p:first-child{ margin-top: 0; }
-
-    .pillrow{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .pill{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(15,23,42,.03);
-      border: 1px solid rgba(15,23,42,.06);
-      color: rgba(15,23,42,.75);
-    }
+    .content{ padding:0 16px 16px; color:rgba(15,23,42,.92); font-size:15px; }
+    .content p{ margin:10px 0 0; }
+    .content p:first-child{ margin-top:0; }
 
     .howlist, .whatlist{
-      margin: 10px 0 0;
-      padding-left: 0;
-      list-style: none;
-      display: grid;
-      gap: 10px;
+      margin:10px 0 0;
+      padding-left:0;
+      list-style:none;
+      display:grid;
+      gap:10px;
     }
     .howitem, .whatitem{
-      background: rgba(15,23,42,.015);
-      border: 1px solid rgba(15,23,42,.06);
-      border-radius: 14px;
-      padding: 12px 12px;
+      background:rgba(15,23,42,.015);
+      border:1px solid rgba(15,23,42,.06);
+      border-radius:14px;
+      padding:12px 12px;
     }
-    .howitem b{ display: block; margin-bottom: 6px; }
+    .howitem b{ display:block; margin-bottom:6px; }
 
-    .note{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 13px;
+    .fastNote{
+      margin-top:12px;
+      font-size:13px;
+      font-weight:800;
+      color:var(--why);
+      white-space:nowrap;
     }
 
     /* Color accents */
-    details.why summary{ border-left: 6px solid var(--why); }
-    details.how summary{ border-left: 6px solid var(--how); }
-    details.what summary{ border-left: 6px solid var(--what); }
+    details.why  summary{ border-left:6px solid var(--why); }
+    details.how  summary{ border-left:6px solid var(--how); }
+    details.what summary{ border-left:6px solid var(--what); }
 
-    details.why .tag{ background: var(--why); }
-    details.how .tag{ background: var(--how); }
-    details.what .tag{ background: var(--what); }
+    details.why  .tag{ background:var(--why); }
+    details.how  .tag{ background:var(--how); }
+    details.what .tag{ background:var(--what); }
 
-    details.why[open] summary{ background: linear-gradient(to right, rgba(227,10,23,.06), rgba(227,10,23,.00)); }
-    details.how[open] summary{ background: linear-gradient(to right, rgba(255,117,31,.08), rgba(255,117,31,.00)); }
-    details.what[open] summary{ background: linear-gradient(to right, rgba(0,60,187,.07), rgba(0,60,187,.00)); }
+    details.why[open]  summary{ background: linear-gradient(to right, rgba(227,10,23,.06), rgba(227,10,23,0)); }
+    details.how[open]  summary{ background: linear-gradient(to right, rgba(0,60,187,.07), rgba(0,60,187,0)); }
+    details.what[open] summary{ background: linear-gradient(to right, rgba(99,168,0,.10), rgba(99,168,0,0)); }
 
     @media (prefers-reduced-motion: reduce){
-      *{ scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+      *{ scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+    }
+    @media (min-width:760px){
+      .wrap{ padding:22px 18px 64px; }
+      summary{ padding:18px 20px; font-size:16px; }
+      .content{ padding:0 20px 20px; font-size:15.5px; }
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <h1>FAST Golden Circle</h1>
-      <p class="sub">Çemberlere tıklayınız: WHY / HOW / WHAT</p>
+  <div class="wrap" id="root">
+    <div class="top">
+      <div class="gcStage" id="gcStage" aria-label="Golden Circle (tıklanabilir)">
+
+        <!-- 73: yazı + kırmızı degrade -->
+        <div class="layer layer-text" aria-hidden="true">
+          <!-- (73.svg) -->
+          <!-- NOTE: Bu bölüm dosyada otomatik gömülü. GitHub’da kullanacaksan 73.svg içeriğini buraya yapıştırman yeterli. -->
+        </div>
+
+        <!-- 72: yeşil halka (WHAT) -->
+        <div class="layer layer-what" aria-hidden="true">
+          <!-- (72.svg) -->
+        </div>
+
+        <!-- 71: mavi halka (HOW) -->
+        <div class="layer layer-how" aria-hidden="true">
+          <!-- (71.svg) -->
+        </div>
+
+        <!-- 70: kırmızı halka (WHY) -->
+        <div class="layer layer-why" aria-hidden="true">
+          <!-- (70.svg) -->
+        </div>
+
+        <!-- Click hotspots -->
+        <button class="hotspot what" type="button" data-target="what" aria-label="WHAT (yeşil)"></button>
+        <button class="hotspot how"  type="button" data-target="how"  aria-label="HOW (mavi)"></button>
+        <button class="hotspot why"  type="button" data-target="why"  aria-label="WHY (kırmızı)"></button>
+      </div>
 
       <div class="toolbar" aria-label="Araçlar">
         <button class="btn" type="button" id="toggleAll" aria-pressed="false">Tümünü Aç</button>
       </div>
-    </header>
 
-    <section class="circleArea" aria-label="Golden Circle">
-      <div class="gc" aria-label="Golden Circle Görsel (tıklanabilir)">
-        <!-- SVG: tıklanabilir 3 halka (arkada fon yok) -->
-        <svg viewBox="0 0 512 512" role="img" aria-label="WHY HOW WHAT çemberleri">
-          <circle class="gcCircle" data-target="why"  cx="256" cy="256" r="206" stroke="var(--why)"  stroke-width="28" tabindex="0" aria-label="WHY çemberi"/>
-          <circle class="gcCircle" data-target="how"  cx="256" cy="256" r="150" stroke="var(--how)"  stroke-width="28" tabindex="0" aria-label="HOW çemberi"/>
-          <circle class="gcCircle" data-target="what" cx="256" cy="256" r="98"  stroke="var(--what)" stroke-width="28" tabindex="0" aria-label="WHAT çemberi"/>
-        </svg>
-      </div>
-    </section>
-
-    <p class="hint">Bir çembere tıklayınca ilgili bölüm aşağıda açılır.</p>
+      <p class="hint">Bir çembere tıklayınca ilgili bölüm aşağıda açılır.</p>
+    </div>
 
     <section class="card" aria-label="Golden Circle Akordiyon">
-
-      <!-- 1) WHY -->
-      <details class="why" open id="sec-why">
+      <details class="why" id="sec-why">
         <summary>
           <span class="summaryLeft">
             <span class="tag">WHY</span>
@@ -293,16 +279,9 @@
             Çoğu zaman aktarılan tanıtım ifadeleri eksik ya da yanlış olduğu için değil; içeriği ve anlatım yapısı,
             karşı tarafın öğrenme ve algılama biçimiyle örtüşmediği için etkisiz kalır.
           </p>
-
-          <div class="pillrow" aria-label="Özet etiketler">
-            <span class="pill">Öğrenme → Karar</span>
-            <span class="pill">Tek tip anlatım</span>
-            <span class="pill">Uyumsuz yapı</span>
-          </div>
         </div>
       </details>
 
-      <!-- 2) HOW -->
       <details class="how" id="sec-how">
         <summary>
           <span class="summaryLeft">
@@ -331,7 +310,6 @@
         </div>
       </details>
 
-      <!-- 3) WHAT -->
       <details class="what" id="sec-what">
         <summary>
           <span class="summaryLeft">
@@ -361,24 +339,27 @@
             </li>
           </ul>
 
-          <p class="note">
-            FAST, 1 gün içinde online 4 oturum veya inhouse 6 oturum eğitim zamanlaması ile verilebilen yeni bir satış/tanıtım eğitimidir.
+          <p class="fastNote">
+            F.A.S.T, 1 gün içinde online 4 oturum veya inhouse 6 oturum eğitim zamanlaması ile verilebilen yeni bir satış/tanıtım eğitimidir.
           </p>
         </div>
       </details>
-
     </section>
   </div>
 
   <script>
-    // ===== Accordion behavior + Toggle All (tek buton) =====
+    const root = document.getElementById("root");
+    const stage = document.getElementById("gcStage");
     const allDetails = Array.from(document.querySelectorAll("details"));
     const toggleBtn = document.getElementById("toggleAll");
-    let bulkAction = false;
 
-    // "toggle all" aktifken birden fazla bölüm açık kalabilir.
-    // Normal durumda (toggle all kapalıyken) akordiyon: sadece 1 bölüm açık kalsın.
+    let bulkAction = false;
     let multiOpenMode = false;
+
+    // ilk açılış: hepsi kapalı
+    bulkAction = true;
+    allDetails.forEach(d => d.open = false);
+    bulkAction = false;
 
     function areAllOpen(){
       return allDetails.length > 0 && allDetails.every(d => d.open);
@@ -392,17 +373,17 @@
 
     function setAll(open){
       bulkAction = true;
-      allDetails.forEach(d => { d.open = open; });
+      allDetails.forEach(d => d.open = open);
       setTimeout(() => {
         bulkAction = false;
-        multiOpenMode = open; // hepsi açıldıysa multi-open moduna geç
+        multiOpenMode = open;
         updateToggleButton();
       }, 0);
     }
 
     function openOnly(target){
       bulkAction = true;
-      allDetails.forEach(d => { d.open = (d === target); });
+      allDetails.forEach(d => d.open = (d === target));
       setTimeout(() => {
         bulkAction = false;
         multiOpenMode = false;
@@ -413,7 +394,6 @@
     allDetails.forEach(d => {
       d.addEventListener("toggle", () => {
         if (bulkAction) return;
-
         if (!multiOpenMode && d.open){
           allDetails.forEach(other => { if (other !== d) other.open = false; });
         }
@@ -424,7 +404,7 @@
     toggleBtn.addEventListener("click", () => setAll(!areAllOpen()));
     updateToggleButton();
 
-    // ===== Golden Circle click -> open corresponding section (and close others) =====
+    // ring -> accordion mapping (kırmızı=why, mavi=how, yeşil=what)
     const map = {
       why:  document.getElementById("sec-why"),
       how:  document.getElementById("sec-how"),
@@ -434,21 +414,24 @@
     function go(target){
       const sec = map[target];
       if (!sec) return;
-
-      // Çember tıklanınca: tek açık kalsın (akordiyon davranışı)
       openOnly(sec);
       sec.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    document.querySelectorAll(".gcCircle").forEach(circle => {
-      const target = circle.getAttribute("data-target");
-      circle.addEventListener("click", () => go(target));
-      circle.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " "){
-          e.preventDefault();
-          go(target);
-        }
-      });
+    function setHoverState(state){
+      stage.classList.remove("state--why", "state--how", "state--what");
+      if (state) stage.classList.add("state--" + state);
+    }
+
+    document.querySelectorAll(".hotspot").forEach(btn => {
+      const target = btn.getAttribute("data-target");
+
+      btn.addEventListener("click", () => go(target));
+
+      btn.addEventListener("mouseenter", () => setHoverState(target));
+      btn.addEventListener("mouseleave", () => setHoverState(null));
+      btn.addEventListener("focusin", () => setHoverState(target));
+      btn.addEventListener("focusout", () => setHoverState(null));
     });
   </script>
 </body>
