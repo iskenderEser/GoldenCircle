@@ -76,6 +76,11 @@
       cursor:pointer;
       outline:none;
       opacity:0; /* invisible */
+      pointer-events:none; /* clicks are handled by gcStage hit-test */
+      touch-action:manipulation;
+    
+      pointer-events:none;
+      display:none;
     }
     .hotspot:focus-visible{
       box-shadow: 0 0 0 4px var(--ring);
@@ -83,7 +88,7 @@
     }
 
     /* Ring hit areas (tuned for your artwork) */
-    .hotspot.what{ width:92%; height:92%; }
+    .hotspot.what{ width:98%; height:98%; }
     .hotspot.how { width:70%; height:70%; }
     .hotspot.why { width:44%; height:44%; }
 
@@ -192,10 +197,16 @@
 
     .fastNote{
       margin-top:12px;
-      font-size:13px;
+      font-size:clamp(12px, 2.8vw, 13px);
       font-weight:800;
       color:var(--why);
-      white-space:nowrap;
+      text-align:center;
+      line-height:1.35;
+      white-space:normal;
+      padding:0 12px;
+    }
+    @media (max-width:420px){
+      .fastNote{ padding:0 10px; }
     }
 
     /* Color accents */
@@ -219,6 +230,47 @@
       summary{ padding:18px 20px; font-size:16px; }
       .content{ padding:0 20px 20px; font-size:15.5px; }
     }
+  
+    /* --- Golden Circle label overlay (WHY/HOW/WHAT) --- */
+    .gcStage{ position:relative; }
+    .gcOverlay{
+      position:absolute;
+      inset:0;
+      pointer-events:none; /* clicks go to the SVG */
+      display:block;
+      z-index:5;
+    }
+    .gcWord{
+      position:absolute;
+      left:50%;
+      transform:translate(-50%,-50%);
+      color:#ffffff;
+      font-weight:800;
+      letter-spacing:0.5px;
+      text-transform:uppercase;
+      line-height:1;
+      /* v5: fontu ~%50 küçültüp taşmayı önledik (WHY baz alınarak hepsi aynı) */
+      font-size:clamp(12px, 2.2vw, 18px);
+      background:transparent;
+      border:none;
+      padding:0;
+      cursor:pointer;
+      pointer-events:auto;
+      text-shadow:0 1px 2px rgba(0,0,0,.25);
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    /* v5: iç–orta–dış halkaların merkezlerine göre dikey yerleşim */
+    .gcWord--why{ top: calc(var(--whyY, 66%) - 44px); }   /* kırmızı halka merkezi */
+    .gcWord--how{ top: calc(var(--howY, 77%) - 52px); }   /* mavi halka merkezi */
+    .gcWord--what{ top: calc(var(--whatY, 90%) - 28px); } /* yeşil halka merkezi */
+
+    .gcWord:focus-visible{
+      outline:3px solid rgba(255,255,255,.9);
+      outline-offset:6px;
+    }
+    .gcWord span{ display:inline-block; }
+
   </style>
 </head>
 
@@ -231,17 +283,17 @@
         <div class="layer layer-how"  aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" zoomAndPan="magnify" viewBox="0 0 810 809.999993" height="1080" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="s71-6c0973bac1"><path d="M 399.371094 399.644531 L 599.128906 399.644531 L 599.128906 599.402344 L 399.371094 599.402344 Z M 399.371094 399.644531 " clip-rule="nonzero"/></clipPath><clipPath id="s71-b98740c627"><path d="M 599.128906 399.644531 C 599.128906 452.253906 577.820312 503.695312 540.621094 540.894531 C 503.421875 578.09375 451.980469 599.402344 399.371094 599.402344 L 399.371094 497.492188 C 425.140625 497.492188 450.335938 487.054688 468.558594 468.832031 C 486.78125 450.609375 497.21875 425.414062 497.21875 399.644531 Z M 599.128906 399.644531 " clip-rule="nonzero"/></clipPath><clipPath id="s71-bf53bb1c74"><path d="M 0.371094 0.644531 L 200.128906 0.644531 L 200.128906 200.402344 L 0.371094 200.402344 Z M 0.371094 0.644531 " clip-rule="nonzero"/></clipPath><clipPath id="s71-b3b6ee149c"><path d="M 200.128906 0.644531 C 200.128906 53.253906 178.820312 104.695312 141.621094 141.894531 C 104.421875 179.09375 52.980469 200.402344 0.371094 200.402344 L 0.371094 98.492188 C 26.140625 98.492188 51.335938 88.054688 69.558594 69.832031 C 87.78125 51.609375 98.21875 26.414062 98.21875 0.644531 Z M 200.128906 0.644531 " clip-rule="nonzero"/></clipPath><clipPath id="s71-c50e31b66d"><rect x="0" width="201" y="0" height="201"/></clipPath><clipPath id="s71-3c964b4539"><path d="M 399.371094 200.375 L 599.128906 200.375 L 599.128906 400.132812 L 399.371094 400.132812 Z M 399.371094 200.375 " clip-rule="nonzero"/></clipPath><clipPath id="s71-a9850efd77"><path d="M 399.371094 200.375 C 451.980469 200.375 503.421875 221.683594 540.621094 258.882812 C 577.820312 296.082031 599.128906 347.523438 599.128906 400.132812 L 497.21875 400.132812 C 497.21875 374.363281 486.78125 349.164062 468.558594 330.941406 C 450.335938 312.722656 425.140625 302.285156 399.371094 302.285156 Z M 399.371094 200.375 " clip-rule="nonzero"/></clipPath><clipPath id="s71-cd4854f88f"><path d="M 0.371094 0.375 L 200.128906 0.375 L 200.128906 200.132812 L 0.371094 200.132812 Z M 0.371094 0.375 " clip-rule="nonzero"/></clipPath><clipPath id="s71-e871c3f116"><path d="M 0.371094 0.375 C 52.980469 0.375 104.421875 21.683594 141.621094 58.882812 C 178.820312 96.082031 200.128906 147.523438 200.128906 200.132812 L 98.21875 200.132812 C 98.21875 174.363281 87.78125 149.164062 69.558594 130.941406 C 51.335938 112.722656 26.140625 102.285156 0.371094 102.285156 Z M 0.371094 0.375 " clip-rule="nonzero"/></clipPath><clipPath id="s71-e292f47cf8"><rect x="0" width="201" y="0" height="201"/></clipPath><clipPath id="s71-319e82d4e4"><path d="M 200.378906 400.742188 L 400.589844 400.742188 L 400.589844 599.402344 L 200.378906 599.402344 Z M 200.378906 400.742188 " clip-rule="nonzero"/></clipPath><clipPath id="s71-cbd8535499"><path d="M 400.132812 599.402344 C 347.527344 599.402344 296.085938 578.210938 258.882812 541.214844 C 221.683594 504.222656 200.378906 453.0625 200.378906 400.742188 L 302.285156 400.742188 C 302.285156 426.371094 312.722656 451.429688 330.945312 469.550781 C 349.167969 487.671875 374.363281 498.054688 400.132812 498.054688 Z M 400.132812 599.402344 " clip-rule="nonzero"/></clipPath><clipPath id="s71-674044cd8f"><path d="M 0.378906 0.742188 L 200 0.742188 L 200 199.402344 L 0.378906 199.402344 Z M 0.378906 0.742188 " clip-rule="nonzero"/></clipPath><clipPath id="s71-7c186b33fb"><path d="M 200.132812 199.402344 C 147.527344 199.402344 96.085938 178.210938 58.882812 141.214844 C 21.683594 104.222656 0.378906 53.0625 0.378906 0.742188 L 102.285156 0.742188 C 102.285156 26.371094 112.722656 51.429688 130.945312 69.550781 C 149.167969 87.671875 174.363281 98.054688 200.132812 98.054688 Z M 200.132812 199.402344 " clip-rule="nonzero"/></clipPath><clipPath id="s71-f7bae11393"><rect x="0" width="201" y="0" height="200"/></clipPath></defs><g clip-path="url(#s71-6c0973bac1)"><g clip-path="url(#s71-b98740c627)"><g transform="matrix(1, 0, 0, 1, 399, 399)"><g clip-path="url(#s71-c50e31b66d)"><g clip-path="url(#s71-bf53bb1c74)"><g clip-path="url(#s71-b3b6ee149c)"><path fill="#003cbb" d="M 200.128906 200.402344 L 0.371094 200.402344 L 0.371094 0.644531 L 200.128906 0.644531 Z M 200.128906 200.402344 " fill-opacity="1" fill-rule="nonzero"/></g></g></g></g></g></g><g clip-path="url(#s71-3c964b4539)"><g clip-path="url(#s71-a9850efd77)"><g transform="matrix(1, 0, 0, 1, 399, 200)"><g clip-path="url(#s71-e292f47cf8)"><g clip-path="url(#s71-cd4854f88f)"><g clip-path="url(#s71-e871c3f116)"><path fill="#003cbb" d="M 200.128906 0.375 L 200.128906 200.132812 L 0.371094 200.132812 L 0.371094 0.375 Z M 200.128906 0.375 " fill-opacity="1" fill-rule="nonzero"/></g></g></g></g></g></g><g clip-path="url(#s71-319e82d4e4)"><g clip-path="url(#s71-cbd8535499)"><g transform="matrix(1, 0, 0, 1, 200, 400)"><g clip-path="url(#s71-f7bae11393)"><g clip-path="url(#s71-674044cd8f)"><g clip-path="url(#s71-7c186b33fb)"><path fill="#003cbb" d="M 0.378906 199.402344 L 0.378906 0.742188 L 199.816406 0.742188 L 199.816406 199.402344 Z M 0.378906 199.402344 " fill-opacity="1" fill-rule="nonzero"/></g></g></g></g></g></g></svg></div>
         <div class="layer layer-why"  aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" zoomAndPan="magnify" viewBox="0 0 810 809.999993" height="1080" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="s70-f20433f854"><path d="M 299.472656 400.746094 L 400.363281 400.746094 L 400.363281 500.082031 L 299.472656 500.082031 Z M 299.472656 400.746094 " clip-rule="nonzero"/></clipPath><clipPath id="s70-a13ce0f190"><path d="M 400.125 500.082031 C 373.71875 500.082031 347.898438 489.484375 329.226562 470.988281 C 310.554688 452.488281 299.859375 426.90625 299.859375 400.746094 L 351.011719 400.746094 C 351.011719 413.558594 356.25 426.089844 365.398438 435.152344 C 374.542969 444.214844 387.191406 449.402344 400.125 449.402344 Z M 400.125 500.082031 " clip-rule="nonzero"/></clipPath><clipPath id="s70-b3e4f58f78"><path d="M 0.761719 0.746094 L 101 0.746094 L 101 100.082031 L 0.761719 100.082031 Z M 0.761719 0.746094 " clip-rule="nonzero"/></clipPath><clipPath id="s70-78950f8ae4"><path d="M 101.125 100.082031 C 74.71875 100.082031 48.898438 89.484375 30.226562 70.988281 C 11.554688 52.488281 0.859375 26.90625 0.859375 0.746094 L 52.011719 0.746094 C 52.011719 13.558594 57.25 26.089844 66.398438 35.152344 C 75.542969 44.214844 88.191406 49.402344 101.125 49.402344 Z M 101.125 100.082031 " clip-rule="nonzero"/></clipPath><clipPath id="s70-5b4d040900"><rect x="0" width="102" y="0" height="101"/></clipPath><clipPath id="s70-afa73fc46b"><path d="M 400.132812 299.867188 L 500.398438 299.867188 L 500.398438 400.132812 L 400.132812 400.132812 Z M 400.132812 299.867188 " clip-rule="nonzero"/></clipPath><clipPath id="s70-4890cddaeb"><path d="M 400.132812 299.867188 C 426.539062 299.867188 452.359375 310.5625 471.03125 329.234375 C 489.703125 347.90625 500.398438 373.726562 500.398438 400.132812 L 449.246094 400.132812 C 449.246094 387.195312 444.003906 374.550781 434.859375 365.402344 C 425.714844 356.257812 413.066406 351.019531 400.132812 351.019531 Z M 400.132812 299.867188 " clip-rule="nonzero"/></clipPath><clipPath id="s70-f09c642e89"><path d="M 0.132812 0.867188 L 100.398438 0.867188 L 100.398438 101.132812 L 0.132812 101.132812 Z M 0.132812 0.867188 " clip-rule="nonzero"/></clipPath><clipPath id="s70-c71cfa420a"><path d="M 0.132812 0.867188 C 26.539062 0.867188 52.359375 11.5625 71.03125 30.234375 C 89.703125 48.90625 100.398438 74.726562 100.398438 101.132812 L 49.246094 101.132812 C 49.246094 88.195312 44.003906 75.550781 34.859375 66.402344 C 25.714844 57.257812 13.066406 52.019531 0.132812 52.019531 Z M 0.132812 0.867188 " clip-rule="nonzero"/></clipPath><clipPath id="s70-604c68e9f8"><rect x="0" width="101" y="0" height="102"/></clipPath><clipPath id="s70-38c1ee6ce2"><path d="M 400.132812 400.132812 L 500.398438 400.132812 L 500.398438 500.398438 L 400.132812 500.398438 Z M 400.132812 400.132812 " clip-rule="nonzero"/></clipPath><clipPath id="s70-9c574a029f"><path d="M 500.398438 400.132812 C 500.398438 426.539062 489.703125 452.359375 471.03125 471.03125 C 452.359375 489.703125 426.539062 500.398438 400.132812 500.398438 L 400.132812 449.246094 C 413.066406 449.246094 425.714844 444.003906 434.859375 434.859375 C 444.003906 425.714844 449.246094 413.066406 449.246094 400.132812 Z M 500.398438 400.132812 " clip-rule="nonzero"/></clipPath><clipPath id="s70-f10f978579"><path d="M 0.132812 0.132812 L 100.398438 0.132812 L 100.398438 100.398438 L 0.132812 100.398438 Z M 0.132812 0.132812 " clip-rule="nonzero"/></clipPath><clipPath id="s70-36f4999e66"><path d="M 100.398438 0.132812 C 100.398438 26.539062 89.703125 52.359375 71.03125 71.03125 C 52.359375 89.703125 26.539062 100.398438 0.132812 100.398438 L 0.132812 49.246094 C 13.066406 49.246094 25.714844 44.003906 34.859375 34.859375 C 44.003906 25.714844 49.246094 13.066406 49.246094 0.132812 Z M 100.398438 0.132812 " clip-rule="nonzero"/></clipPath><clipPath id="s70-b613c586b1"><rect x="0" width="101" y="0" height="101"/></clipPath></defs><g clip-path="url(#s70-f20433f854)"><g clip-path="url(#s70-a13ce0f190)"><g transform="matrix(1, 0, 0, 1, 299, 400)"><g clip-path="url(#s70-5b4d040900)"><g clip-path="url(#s70-b3e4f58f78)"><g clip-path="url(#s70-78950f8ae4)"><path fill="#e30a17" d="M 0.859375 100.082031 L 0.859375 0.746094 L 100.972656 0.746094 L 100.972656 100.082031 Z M 0.859375 100.082031 " fill-opacity="1" fill-rule="nonzero"/></g></g></g></g></g></g><g clip-path="url(#s70-afa73fc46b)"><g clip-path="url(#s70-4890cddaeb)"><g transform="matrix(1, 0, 0, 1, 400, 299)"><g clip-path="url(#s70-604c68e9f8)"><g clip-path="url(#s70-f09c642e89)"><g clip-path="url(#s70-c71cfa420a)"><path fill="#e30a17" d="M 100.398438 0.867188 L 100.398438 101.132812 L 0.132812 101.132812 L 0.132812 0.867188 Z M 100.398438 0.867188 " fill-opacity="1" fill-rule="nonzero"/></g></g></g></g></g></g><g clip-path="url(#s70-38c1ee6ce2)"><g clip-path="url(#s70-9c574a029f)"><g transform="matrix(1, 0, 0, 1, 400, 400)"><g clip-path="url(#s70-b613c586b1)"><g clip-path="url(#s70-f10f978579)"><g clip-path="url(#s70-36f4999e66)"><path fill="#e30a17" d="M 100.398438 100.398438 L 0.132812 100.398438 L 0.132812 0.132812 L 100.398438 0.132812 Z M 100.398438 100.398438 " fill-opacity="1" fill-rule="nonzero"/></g></g></g></g></g></g></svg></div>
 
-        <!-- Click hotspots -->
-        <button class="hotspot what" type="button" data-target="what" aria-label="WHAT (yeşil)"></button>
-        <button class="hotspot how"  type="button" data-target="how"  aria-label="HOW (mavi)"></button>
-        <button class="hotspot why"  type="button" data-target="why"  aria-label="WHY (kırmızı)"></button>
+        <!-- Click labels (only these are clickable) -->
+        <button class="gcWord gcWord--why" type="button" data-target="why" aria-label="WHY (kırmızı)"><span>WHY</span></button>
+        <button class="gcWord gcWord--how" type="button" data-target="how" aria-label="HOW (mavi)"><span>HOW</span></button>
+        <button class="gcWord gcWord--what" type="button" data-target="what" aria-label="WHAT (yeşil)"><span>WHAT</span></button>
       </div>
 
       <div class="toolbar" aria-label="Araçlar">
         <button class="btn" type="button" id="toggleAll" aria-pressed="false">Tümünü Aç</button>
       </div>
 
-      <p class="hint">Bir çembere tıklayınca ilgili bölüm aşağıda açılır.</p>
+      <p class="hint">Sadece <b>WHY / HOW / WHAT</b> yazılarına tıklayın (halkalar tıklanmaz).</p>
     </div>
 
     <section class="card" aria-label="Golden Circle Akordiyon">
@@ -408,16 +460,33 @@
       if (state) stage.classList.add("state--" + state);
     }
 
-    document.querySelectorAll(".hotspot").forEach(btn => {
-      const target = btn.getAttribute("data-target");
+    // Hit-test: decide which ring is intended by distance to center (no overlap problems)
+// Radii are derived from CSS hotspot diameters: why=44%, how=70%, what=92% (of stage size)
+const R = { why: 0.44/2, how: 0.70/2, what: 0.98/2 };
 
-      btn.addEventListener("click", () => go(target));
+function pickTargetFromEvent(evt){
+  const rect = stage.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top  + rect.height / 2;
+  const dx = evt.clientX - cx;
+  const dy = evt.clientY - cy;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  const r = dist / (rect.width / 2); // normalize to 0..1
 
-      btn.addEventListener("mouseenter", () => setHoverState(target));
-      btn.addEventListener("mouseleave", () => setHoverState(null));
-      btn.addEventListener("focusin", () => setHoverState(target));
-      btn.addEventListener("focusout", () => setHoverState(null));
-    });
+  if (r <= R.why) return "why";
+  if (r <= R.how) return "how";
+  if (r <= R.what) return "what";
+  return null;
+}
+
+// Keyboard / accessibility: keep existing hotspots for focus & ARIA, but let them only drive hover + navigation
+document.querySelectorAll(".gcWord").forEach(btn => {
+  const target = btn.getAttribute("data-target");
+  btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); go(target); });
+  btn.addEventListener("focusin", () => setHoverState(target));
+  btn.addEventListener("focusout", () => setHoverState(null));
+});
+
   </script>
 </body>
 </html>
