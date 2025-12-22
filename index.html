@@ -271,7 +271,15 @@
     }
     .gcWord span{ display:inline-block; }
 
-  </style>
+  
+    /* Mobile-only micro offsets for label alignment (does NOT affect desktop) */
+    @media (max-width: 600px){
+      .gcWord--why{ top: calc(var(--whyY, 66%) - 42px); }  /* -44px + 2px down */
+      .gcWord--how{ top: calc(var(--howY, 77%) - 49px); }  /* -52px + 3px down */
+      .gcWord--what{ top: calc(var(--whatY, 90%) - 26px); } /* -28px + 2px down */
+    }
+
+</style>
 </head>
 
 <body>
